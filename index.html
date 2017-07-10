@@ -9,14 +9,33 @@
     <link rel="stylesheet" type="text/css" href="assets/css/style.css">
 </head>
 <body>
-    <div 
-        id="tempMonitor"
-        v-text="appName"
-        v-bind:class="{
-            'header1':true,
-            'isOnlineColor': isOnline,
-            }">
+    <div id="tempMonitor">
+        <div
+            v-text="appName"
+            v-bind:class="{
+                'header1':true,
+                'isOnlineColor': isOnline,
+                }">
+        </div>
+        <div>
+            <input type="checkbox" v-model="isOnline">Start Reading Data
+        </div>
+        <div>
+            <label>
+                <input type="checkbox" v-model="displayOptions" value="temperature">
+                Temperature
+            </label>
+            <label>
+                <input type="checkbox" v-model="displayOptions" value="humidity">
+                Humidity
+            </label>
+        <div>
+            <input v-model="userName" placeholder="Enter name for this session">
+        </div>
+        <div>Session: {{ userName }}</div>
+        <div>{{ displayOptions }}</div>
     </div>
+    
     
 	<!--Vue CDN-->
     <script type="text/javascript" src="https://unpkg.com/vue"></script>
