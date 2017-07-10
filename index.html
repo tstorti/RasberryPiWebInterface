@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tempeature Monitor</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:500" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="assets/css/reset.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+</head>
+<body>
+    <div 
+        id="tempMonitor"
+        v-text="appName"
+        v-bind:class="{
+            'header1':true,
+            'isOnlineColor': isOnline,
+            }">
+    </div>
+    
+	<!--Vue CDN-->
+    <script type="text/javascript" src="https://unpkg.com/vue"></script>
+    <script type="text/javascript" src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script type="text/javascript" src="assets/javascript/app.js"></script>
+</body>
+</html>
