@@ -9,7 +9,7 @@
     <link rel="stylesheet" type="text/css" href="assets/css/style.css">
 </head>
 <body>
-    <div id="tempMonitor">
+    <div id="tempMonitor" v-cloak>
         <div
             v-text="appName"
             v-bind:class="{
@@ -18,28 +18,64 @@
                 }">
         </div>
         <div>
-            <input type="checkbox" v-model="isOnline">Start Reading Data
+            <input v-model="sessionName" placeholder="Enter name for this session">
+        </div>
+        <div>Session: {{ sessionName }}</div>
+        <div>
+            <button type="button" v-on:click="displayCurrentInfo" v-text="statusBtnText"></button>
         </div>
         <div>
             <label>
-                <input type="checkbox" v-model="displayOptions" value="temperature">
+                <input type="checkbox" v-model="showTemp">
                 Temperature
             </label>
             <label>
-                <input type="checkbox" v-model="displayOptions" value="humidity">
+                <input type="checkbox" v-model="showHumidity">
                 Humidity
             </label>
-        <div>
-            <input v-model="userName" placeholder="Enter name for this session">
+            <label>
+                <input type="checkbox" v-model="showSoilMoisture">
+                Soil Moisture
+            </label>
         </div>
-        <div>Session: {{ userName }}</div>
-        <div>{{ displayOptions }}</div>
+        <table>
+            <tr v-show="showTemp">
+                <th>{{ tempHeader }}</th>
+                <td>{{ tempValue }}</td>
+            </tr>
+            <tr v-show="showHumidity">
+                <th>{{ humidityHeader }}</th>
+                <td>{{ humidityValue }}</td>
+            </tr>
+            <tr v-show="showSoilMoisture">
+                <th>{{ soilMoistureHeader }}</th>
+                <td>{{ soilMoistureValue }}</td>
+            </tr>
+        </table>
+        <div>
+            <button type="button" v-on:click="displayHistoricInfo">Display Historic Info</button>
+        </div>
+        <table v-if="showHistoric">
+            <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Temperature</th>
+            </tr>
+            <tr v-for="record in historicData">
+                <td>{{ record.date }}</td>
+                <td>{{ record.time }}</td>
+                <td>{{ record.temp }}</td>
+            </tr>
+            
+        </table>
+
     </div>
     
     
 	<!--Vue CDN-->
     <script type="text/javascript" src="https://unpkg.com/vue"></script>
     <script type="text/javascript" src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script type="text/javascript" src="assets/javascript/data.js"></script>
     <script type="text/javascript" src="assets/javascript/app.js"></script>
 </body>
 </html>
