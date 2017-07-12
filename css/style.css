@@ -1,0 +1,28 @@
+body{
+	background-color: #b0bec5;
+}
+.btn-width{
+	width:250px;
+}
+
+[v-cloak]{
+	display:none;
+}
+.chart{
+	
+}
+.btn-space{
+	margin-top:10px;
+}
+.isOnlineColor{
+	color: #007E33;
+}
+.pageHeader{
+	margin-bottom: 25px;
+}
+.sensorSelection{
+	margin-top:20px;
+}
+.chartSection{
+	margin-top:20px;
+}

@@ -4,78 +4,146 @@
 	<meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Tempeature Monitor</title>
-    <link href="https://fonts.googleapis.com/css?family=Roboto:500" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="assets/css/reset.css">
-    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+
+    <!-- Bootstrap Material Design -->
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.0/css/font-awesome.min.css">
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Material Design Bootstrap -->
+    <link href="css/mdb.min.css" rel="stylesheet">
+
+    <!-- Your custom styles (optional) -->
+    <link href="css/style.css" rel="stylesheet">
+
 </head>
 <body>
     <div id="tempMonitor" v-cloak>
-        <div
-            v-text="appName"
-            v-bind:class="{
-                'header1':true,
-                'isOnlineColor': isOnline,
-                }">
+        <div class="container pageHeader">
+            <div class="h2">Rasberry Pi Monitor</div>
         </div>
-        <div>
-            <input v-model="sessionName" placeholder="Enter name for this session">
+        <div class="container">
+            <div class="row">
+                <div class="col-md">
+                    <div class="card">
+                        <div class="card-header blue-grey lighten-2">Data Collection Session Name</div>
+                        <div class="card-block blue-grey lighten-3">
+                            <input class="form-control blue-grey lighten-5" id="session-name" v-model="sessionName" placeholder=" Session Name">
+                        </div>
+                    </div>
+                    <div class="card sensorSelection">
+                        <div class="card-header blue-grey lighten-2">Data to Collect</div>
+                        <div class="card-block checkbox checkbox-primary blue-grey lighten-3">
+                            <input id="showTemp" type="checkbox" v-model="showTemp">
+                            <label for="showTemp">Temperature</label>
+                            <input id="showHumidity" type="checkbox" v-model="showHumidity">
+                            <label for="showHumidity">Humidity</label>
+                            <input id="showSoilMoisture" type="checkbox" v-model="showSoilMoisture">
+                            <label for="showSoilMoisture">Soil Moisture</label>
+                                
+                        </div>
+                    </div>
+                    <div>
+                        <button class="btn btn-space btn-success btn-width" type="button" v-on:click="displayCurrentInfo" v-text="statusBtnText" v-bind:class="{'btn-danger':isOnline,}"></button>
+                    </div>
+                    <div>
+                        <button class="btn btn-space btn-info btn-width" type="button" v-on:click="displayHistoricInfo" v-text="dataToggleText"></button>
+                    </div>
+                    <div>
+                        <button class="btn btn-space btn-info btn-width" type="button" v-on:click="displaySessionInfo" v-text="sessionToggleText"></button>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="h3" v-bind:class="{'isOnlineColor': isOnline,}">Session: {{ sessionName }}</div>
+                    <table class="table">
+                        <tr v-show="showTemp">
+                            <th>{{ tempHeader }}</th>
+                            <td>{{ tempValue }}</td>
+                        </tr>
+                        <tr v-show="showHumidity">
+                            <th>{{ humidityHeader }}</th>
+                            <td>{{ humidityValue }}</td>
+                        </tr>
+                        <tr v-show="showSoilMoisture">
+                            <th>{{ soilMoistureHeader }}</th>
+                            <td>{{ soilMoistureValue }}</td>
+                        </tr>
+                    </table>  
+                </div>
+            </div>
         </div>
-        <div>Session: {{ sessionName }}</div>
-        <div>
-            <button type="button" v-on:click="displayCurrentInfo" v-text="statusBtnText"></button>
+         
+        <div class="container">
+            <div class="row" >
+                <div class="col-md-6">
+                    <canvas v-show="showSession" id="sessionTempChart"></canvas>
+                </div>
+                <div class="col-md-6">
+                    <canvas class="col-md" v-show="showSession" id="sessionHumidityChart"></canvas>
+                </div>
+            </div>
         </div>
-        <div>
-            <label>
-                <input type="checkbox" v-model="showTemp">
-                Temperature
-            </label>
-            <label>
-                <input type="checkbox" v-model="showHumidity">
-                Humidity
-            </label>
-            <label>
-                <input type="checkbox" v-model="showSoilMoisture">
-                Soil Moisture
-            </label>
+        <div class="container chartSection" v-if="showSession">
+            <div class="card">
+                <div class="card-header">{{ sessionName }} Session Data</div>
+                <div class="card-block">
+                    <table class="table">
+                        <tr>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Temperature</th>
+                            <th>Humidity</th>
+                        </tr> 
+                        <tr v-for="record in sessionData">
+                            <td>{{record.date}}</td>
+                            <td>{{record.time}}</td>
+                            <td>{{record.temp}}</td>
+                            <td>{{record.humidity}}</td> 
+                    </table>
+                </div>
+            </div>
         </div>
-        <table>
-            <tr v-show="showTemp">
-                <th>{{ tempHeader }}</th>
-                <td>{{ tempValue }}</td>
-            </tr>
-            <tr v-show="showHumidity">
-                <th>{{ humidityHeader }}</th>
-                <td>{{ humidityValue }}</td>
-            </tr>
-            <tr v-show="showSoilMoisture">
-                <th>{{ soilMoistureHeader }}</th>
-                <td>{{ soilMoistureValue }}</td>
-            </tr>
-        </table>
-        <div>
-            <button type="button" v-on:click="displayHistoricInfo">Display Historic Info</button>
+        <div class="container chartSection" v-if="showHistoric">
+            <div class="card">
+                <div class="card-header">Historic Data</div>
+                <div class="card-block">
+                    <table class="table">
+                        <tr>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Temperature</th>
+                        </tr>
+                        <tr v-for="record in historicData">
+                            <td>{{ record.date }}</td>
+                            <td>{{ record.time }}</td>
+                            <td>{{ record.temp }}</td>
+                        </tr>   
+                    </table>
+                </div>
+            </div>
         </div>
-        <table v-if="showHistoric">
-            <tr>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Temperature</th>
-            </tr>
-            <tr v-for="record in historicData">
-                <td>{{ record.date }}</td>
-                <td>{{ record.time }}</td>
-                <td>{{ record.temp }}</td>
-            </tr>
-            
-        </table>
-
     </div>
-    
-    
+
+      
 	<!--Vue CDN-->
     <script type="text/javascript" src="https://unpkg.com/vue"></script>
     <script type="text/javascript" src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script type="text/javascript" src="assets/javascript/data.js"></script>
-    <script type="text/javascript" src="assets/javascript/app.js"></script>
+     <!-- JQuery -->
+    <script type="text/javascript" src="js/jquery-2.2.3.min.js"></script>
+
+    <!-- Bootstrap tooltips -->
+    <script type="text/javascript" src="js/tether.min.js"></script>
+
+    <!-- Bootstrap core JavaScript -->
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+
+    <!-- MDB core JavaScript -->
+    <script type="text/javascript" src="js/mdb.min.js"></script>
+    <!--Moment.js to get timestamp for data-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.js"></script>
+    <script type="text/javascript" src="js/data.js"></script>
+    <script type="text/javascript" src="js/app.js"></script>
 </body>
 </html>
