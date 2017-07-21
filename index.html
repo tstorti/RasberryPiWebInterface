@@ -5,16 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Tempeature Monitor</title>
 
-    <!-- Bootstrap Material Design -->
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.0/css/font-awesome.min.css">
-
-    <!-- Bootstrap core CSS -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Material Design Bootstrap -->
-    <link href="css/mdb.min.css" rel="stylesheet">
-
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <!-- Your custom styles (optional) -->
     <link href="css/style.css" rel="stylesheet">
 
@@ -26,23 +17,28 @@
         </div>
         <div class="container">
             <div class="row">
-                <div class="col-md">
-                    <div class="card">
-                        <div class="card-header blue-grey lighten-2">Data Collection Session Name</div>
-                        <div class="card-block blue-grey lighten-3">
-                            <input class="form-control blue-grey lighten-5" id="session-name" v-model="sessionName" placeholder=" Session Name">
+                <div class="col-md-6">
+                    <div>
+                        <div>Data Collection Session Name</div>
+                        <div>
+                            <input id="session-name" v-model="sessionName" placeholder="Session Name">
                         </div>
                     </div>
-                    <div class="card sensorSelection">
-                        <div class="card-header blue-grey lighten-2">Data to Collect</div>
-                        <div class="card-block checkbox checkbox-primary blue-grey lighten-3">
-                            <input id="showTemp" type="checkbox" v-model="showTemp">
-                            <label for="showTemp">Temperature</label>
-                            <input id="showHumidity" type="checkbox" v-model="showHumidity">
-                            <label for="showHumidity">Humidity</label>
-                            <input id="showSoilMoisture" type="checkbox" v-model="showSoilMoisture">
-                            <label for="showSoilMoisture">Soil Moisture</label>
-                                
+                    <div class="sensorSelection">
+                        <div>Data to Collect</div>
+                        <div>
+                            <div>
+                                <input id="showTemp" type="checkbox" v-model="showTemp">
+                                <label for="showTemp">Temperature</label>
+                            </div>
+                            <div>
+                                <input id="showHumidity" type="checkbox" v-model="showHumidity">
+                                <label for="showHumidity">Humidity</label>
+                            </div>
+                            <div>
+                                <input id="showSoilMoisture" type="checkbox" v-model="showSoilMoisture">
+                                <label for="showSoilMoisture">Soil Moisture</label>
+                            </div>   
                         </div>
                     </div>
                     <div>
@@ -55,7 +51,7 @@
                         <button class="btn btn-space btn-info btn-width" type="button" v-on:click="displaySessionInfo" v-text="sessionToggleText"></button>
                     </div>
                 </div>
-                <div class="col-md">
+                <div class="col-md-6">
                     <div class="h3" v-bind:class="{'isOnlineColor': isOnline,}">Session: {{ sessionName }}</div>
                     <table class="table">
                         <tr v-show="showTemp">
@@ -78,17 +74,17 @@
         <div class="container">
             <div class="row" >
                 <div class="col-md-6">
-                    <canvas v-show="showSession" id="sessionTempChart"></canvas>
+                    <div v-show="showSession" id="sessionTempChart"></div>
                 </div>
                 <div class="col-md-6">
-                    <canvas class="col-md" v-show="showSession" id="sessionHumidityChart"></canvas>
+                    <div class="col-md" v-show="showSession" id="sessionHumidityChart"></div>
                 </div>
             </div>
         </div>
         <div class="container chartSection" v-if="showSession">
-            <div class="card">
-                <div class="card-header">{{ sessionName }} Session Data</div>
-                <div class="card-block">
+            <div>
+                <div>{{ sessionName }} Session Data</div>
+                <div>
                     <table class="table">
                         <tr>
                             <th>Date</th>
@@ -106,9 +102,9 @@
             </div>
         </div>
         <div class="container chartSection" v-if="showHistoric">
-            <div class="card">
-                <div class="card-header">Historic Data</div>
-                <div class="card-block">
+            <div>
+                <div>Historic Data</div>
+                <div>
                     <table class="table">
                         <tr>
                             <th>Date</th>
@@ -131,16 +127,11 @@
     <script type="text/javascript" src="https://unpkg.com/vue"></script>
     <script type="text/javascript" src="https://unpkg.com/axios/dist/axios.min.js"></script>
      <!-- JQuery -->
-    <script type="text/javascript" src="js/jquery-2.2.3.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
-    <!-- Bootstrap tooltips -->
-    <script type="text/javascript" src="js/tether.min.js"></script>
+    <!-- High Charts -->
+    <script src="http://code.highcharts.com/highcharts.js"></script>
 
-    <!-- Bootstrap core JavaScript -->
-    <script type="text/javascript" src="js/bootstrap.min.js"></script>
-
-    <!-- MDB core JavaScript -->
-    <script type="text/javascript" src="js/mdb.min.js"></script>
     <!--Moment.js to get timestamp for data-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.js"></script>
     <script type="text/javascript" src="js/data.js"></script>

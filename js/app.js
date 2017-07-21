@@ -84,9 +84,8 @@ var tempMonitor = new Vue({
 						};
 						tempMonitor.sessionData.push(newRecord);
 						tempMonitor.newTimestampArray.push(timestamp);
-						tempMonitor.newTempArray.push(tempMonitor.tempValue);
-						tempMonitor.newHumidityArray.push(tempMonitor.humidityValue);
-						Chart.defaults.global.animation=false;
+						tempMonitor.newTempArray.push(parseFloat(tempMonitor.tempValue));
+						tempMonitor.newHumidityArray.push(parseFloat(tempMonitor.humidityValue));
 						tempMonitor.sessionTempChart();
 						tempMonitor.sessionHumidityChart();			
 				});
@@ -119,50 +118,49 @@ var tempMonitor = new Vue({
 			
 		},
 		sessionTempChart:function(){		
-			
-			var option={
-				responsive:true,
-			};
-			var data = {
-			    labels: this.limitLabels(this.newTimestampArray),
-			    datasets: [
-			        {
-			            label: "Temp Chart",
-			            fillColor: "rgba(151,187,205,0.2)",
-			            strokeColor: "rgba(151,187,205,1)",
-			            pointColor: "rgba(151,187,205,1)",
-			            pointStrokeColor: "#fff",
-			            pointHighlightFill: "#fff",
-			            pointHighlightStroke: "rgba(151,187,205,1)",
-			            data: this.newTempArray,
-			        }
-			    ]
-			};
-			var ctx = document.getElementById("sessionTempChart").getContext('2d');
-    		this.tempChart = new Chart(ctx).Line(data, option); //'Line' defines type of the chart.
+    		Highcharts.chart('sessionTempChart', {
+			        chart: {
+			            type: 'line'
+			        },
+			        title: {
+			            text: 'Temperature'
+			        },
+			        xAxis: {
+			            categories: this.newTimestampArray
+			        },
+			        yAxis: {
+			            title: {
+			                text: 'Temperature'
+			            }
+			        },
+			        series: [{
+			            name: 'Temperature',
+			            data: this.newTempArray
+			        }]
+			    });
 
 		},
 		sessionHumidityChart:function(){
-			var option={
-				responsive:true,
-			};
-			var data = {
-			    labels: this.limitLabels(this.newTimestampArray),
-			    datasets: [
-			        {
-			            label: "Humidity Chart",
-			            fillColor: "rgba(220,220,220,0.2)",
-			            strokeColor: "rgba(220,220,220,1)",
-			            pointColor: "rgba(220,220,220,1)",
-			            pointStrokeColor: "#fff",
-			            pointHighlightFill: "#fff",
-			            pointHighlightStroke: "rgba(220,220,220,1)",
-			            data: this.newHumidityArray,
+			Highcharts.chart('sessionHumidityChart', {
+			        chart: {
+			            type: 'line'
 			        },
-			    ]
-			};
-			var ctx = document.getElementById("sessionHumidityChart").getContext('2d');
-    		this.humidityChart = new Chart(ctx).Line(data, option); //'Line' defines type of the chart.
+			        title: {
+			            text: 'Humidity'
+			        },
+			        xAxis: {
+			            categories: this.newTimestampArray
+			        },
+			        yAxis: {
+			            title: {
+			                text: 'Humidity'
+			            }
+			        },
+			        series: [{
+			            name: 'Humidity',
+			            data: this.newHumidityArray
+			        }]
+			    });
 		},
 		//only show 5 labels for array of time after large number of data points for readability
 		limitLabels:function(array){
@@ -189,9 +187,25 @@ var tempMonitor = new Vue({
 			return (newLabelArray);	
 		},
 		initFirebase:function(){
-			firebase.initializeApp(keys.firebaseKeys);
+			firebase.initializeApp(firebaseKeys);
+			
+			firebase.database().ref('.info/connected').on('value', function(snapshot) {
+				if (snapshot.val() === true) {
+					// We're connected (or reconnected)! Do anything here that should happen only if online (or on reconnect)
+					console.log("connected");
+					var connection = firebase.database().ref('status/connections/webclient').push();
+
+					// When I disconnect, remove this device
+					connection.onDisconnect().remove();
+					
+					// Add this device to my connections list
+					// this value could contain info about the device or a timestamp too
+					connection.set(true);
+				}
+			});
+
 		},
 	},
 });
 
-firebase.initializeApp(firebaseKeys);
+tempMonitor.initFirebase();
