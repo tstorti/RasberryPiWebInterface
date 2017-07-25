@@ -34,11 +34,7 @@
                             <div>
                                 <input id="showHumidity" type="checkbox" v-model="showHumidity">
                                 <label for="showHumidity">Humidity</label>
-                            </div>
-                            <div>
-                                <input id="showSoilMoisture" type="checkbox" v-model="showSoilMoisture">
-                                <label for="showSoilMoisture">Soil Moisture</label>
-                            </div>   
+                            </div>  
                         </div>
                     </div>
                     <div>
@@ -46,6 +42,18 @@
                     </div>
                     <div>
                         <button class="btn btn-space btn-info btn-width" type="button" v-on:click="displayHistoricInfo" v-text="dataToggleText"></button>
+                        <span class="btn-group">
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Select Historic Session <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" v-for="name in historicDataArray">
+                                <table>
+                                    <tr v-for="record in historicDataArray">
+                                        <td><input type="radio" name="historic" :value="record.key" v-model="historicSelected">{{record.name}}</input></td>
+                                    </tr>
+                                </table> 
+                            </ul>
+                        </span>
                     </div>
                     <div>
                         <button class="btn btn-space btn-info btn-width" type="button" v-on:click="displaySessionInfo" v-text="sessionToggleText"></button>
@@ -62,13 +70,10 @@
                             <th>{{ humidityHeader }}</th>
                             <td>{{ humidityValue }}</td>
                         </tr>
-                        <tr v-show="showSoilMoisture">
-                            <th>{{ soilMoistureHeader }}</th>
-                            <td>{{ soilMoistureValue }}</td>
-                        </tr>
                     </table>  
                 </div>
             </div>
+            <div v-show="showWarning">{{inputWarning}}</div>
         </div>
          
         <div class="container">
@@ -87,17 +92,26 @@
                 <div>
                     <table class="table">
                         <tr>
-                            <th>Date</th>
                             <th>Time</th>
                             <th>Temperature</th>
                             <th>Humidity</th>
                         </tr> 
                         <tr v-for="record in sessionData">
-                            <td>{{record.date}}</td>
                             <td>{{record.time}}</td>
                             <td>{{record.temp}}</td>
                             <td>{{record.humidity}}</td> 
+                        </tr>
                     </table>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="row" >
+                <div class="col-md-6">
+                    <div v-show="showHistoric" id="historicTempChart"></div>
+                </div>
+                <div class="col-md-6">
+                    <div class="col-md" v-show="showHistoric" id="historicHumidityChart"></div>
                 </div>
             </div>
         </div>
@@ -107,27 +121,29 @@
                 <div>
                     <table class="table">
                         <tr>
-                            <th>Date</th>
                             <th>Time</th>
                             <th>Temperature</th>
+                            <th>Humidity</th>
                         </tr>
                         <tr v-for="record in historicData">
-                            <td>{{ record.date }}</td>
-                            <td>{{ record.time }}</td>
-                            <td>{{ record.temp }}</td>
+                            <td>{{record.time}}</td>
+                            <td>{{record.temp}}</td>
+                            <td>{{record.humidity}}</td>
                         </tr>   
                     </table>
                 </div>
             </div>
         </div>
     </div>
+    
     <!--Firebase-->
     <script src="https://www.gstatic.com/firebasejs/4.1.3/firebase.js"></script>  
 	<!--Vue CDN-->
     <script type="text/javascript" src="https://unpkg.com/vue"></script>
     <script type="text/javascript" src="https://unpkg.com/axios/dist/axios.min.js"></script>
-     <!-- JQuery -->
+     <!-- Bootstrap and JQuery (Required) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
     <!-- High Charts -->
     <script src="http://code.highcharts.com/highcharts.js"></script>
