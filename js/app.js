@@ -28,6 +28,9 @@ var tempMonitor = new Vue({
 		newHumidityArray:[],
 		historicTempArray:[],
 		historicHumidityArray:[],
+		sensorArray:[],
+		noSensors:true,
+		sensorSelected:null,
 		tempChart:null,
 		humidityChart:null,
 		historicTempChart:null,
@@ -39,100 +42,112 @@ var tempMonitor = new Vue({
 		showWarning:false,
 	},
 	methods:{
-		displayCurrentInfo:function(){
-			
-			if(this.appState==="standby"){
-				this.appState="recording";
-				this.statusBtnText="Stop Collecting Data";
-				this.isOnline=true;
-
-				//reset session data arrays so duplicate data isn't appended when user clicks collect data button 2nd time.
-				tempMonitor.newTimestampArray=[];
-				tempMonitor.newTempArray=[];
-				tempMonitor.newHumidityArray=[];
-				tempMonitor.sessionData=[];
-
-				//TODO - if Pi is not online, give warning and do not start saving data
-				
-				//get new key to save current session data
-				firebaseKey = firebase.database().ref().child("historic_sessions").push().getKey();
-				//if not set to "off", rasberry pi will record data.
-				firebase.database().ref().child("status").update({
-					"current_session":firebaseKey,
-					"isRecording":true,
-				});
-				//set initial session data
-				firebase.database().ref().child("historic_sessions").child(firebaseKey).set({
-					"name": tempMonitor.sessionName,
-					"start_time": moment().format("YYYY-MM-DD HH:mm:ss"),
-				});
-
-				//using historic data placeholder for now - need to replace child key with "firebaseKey"
-				firebase.database().ref().child("historic_sessions").child(firebaseKey).child("data").on("child_added", function(snapshot) {
-						
-						tempMonitor.tempValue = snapshot.val().temperature;
-						tempMonitor.humidityValue = snapshot.val().humidity;
-						timestamp= snapshot.val().timestamp;
-						
-						var newRecord = {
-							"time":timestamp,
-							"temp":tempMonitor.tempValue,
-							"humidity":tempMonitor.humidityValue,
-						};
-						tempMonitor.sessionData.push(newRecord);
-						tempMonitor.newTimestampArray.push(timestamp);
-						tempMonitor.newTempArray.push([timestamp,parseFloat(tempMonitor.tempValue)]);
-						tempMonitor.newHumidityArray.push([timestamp,parseFloat(tempMonitor.humidityValue)]);
-						tempMonitor.tempChart.series[0].update({data: tempMonitor.newTempArray});
-						tempMonitor.humidityChart.series[0].update({data: tempMonitor.newHumidityArray});
-				});
+		startRecording:function(){
+			if(this.sensorSelected !== null){
+				this.inputWarning = null;
+				this.showWarning=false;
+				if(this.appState==="standby"){
+					this.appState="recording";
+					this.statusBtnText="Stop Collecting Data";
+					this.isOnline=true;
+					//get new key to save current session data
+					firebaseKey = firebase.database().ref().child("historic_sessions").push().getKey();
+					//if not set to "off", rasberry pi will record data.
+					firebase.database().ref().child("sensors").child(tempMonitor.sensorSelected).update({
+						"current_session":firebaseKey,
+						"isRecording":true,
+					});
+					this.displayCurrentInfo();
+				}
+				else if (this.appState==="recording"){
+					this.appState="standby";
+					this.statusBtnText="Start Collecting Data";
+					this.isOnline=false;
+					clearInterval(tempMonitor.timeInterval);
+					firebase.database().ref().child("sensors").child(tempMonitor.sensorSelected).update({
+						"isRecording":false,
+					});	
+				}
 			}
-			else if (this.appState==="recording"){
-				this.appState="standby";
-				this.statusBtnText="Start Collecting Data";
-				this.isOnline=false;
-				clearInterval(tempMonitor.timeInterval);
-				firebase.database().ref().child("status").update({
-					"isRecording":false,
-				});	
-			}		
+			else{
+				this.showWarning=true;
+				this.inputWarning = "You must select a sensor to start recording";
+			}
+			
 		},
+		displayCurrentInfo:function(){
+			//reset session data arrays so duplicate data isn't appended when user clicks collect data button 2nd time.
+			tempMonitor.newTimestampArray=[];
+			tempMonitor.newTempArray=[];
+			tempMonitor.newHumidityArray=[];
+			tempMonitor.sessionData=[];
+
+			//set initial session data
+			firebase.database().ref().child("historic_sessions").child(firebaseKey).set({
+				"name": tempMonitor.sessionName,
+				"start_time": moment().format("YYYY-MM-DD HH:mm:ss"),
+			});
+
+			//using historic data placeholder for now - need to replace child key with "firebaseKey"
+			firebase.database().ref().child("historic_sessions").child(firebaseKey).child("data").on("child_added", function(snapshot) {
+					
+					tempMonitor.tempValue = snapshot.val().temperature;
+					tempMonitor.humidityValue = snapshot.val().humidity;
+					timestamp= snapshot.val().timestamp;
+					
+					var newRecord = {
+						"time":timestamp,
+						"temp":tempMonitor.tempValue,
+						"humidity":tempMonitor.humidityValue,
+					};
+					tempMonitor.sessionData.push(newRecord);
+					tempMonitor.newTimestampArray.push(timestamp);
+					tempMonitor.newTempArray.push([timestamp,parseFloat(tempMonitor.tempValue)]);
+					tempMonitor.newHumidityArray.push([timestamp,parseFloat(tempMonitor.humidityValue)]);
+					tempMonitor.tempChart.series[0].update({data: tempMonitor.newTempArray});
+					tempMonitor.humidityChart.series[0].update({data: tempMonitor.newHumidityArray});
+			});
 		
+		},
 		displayHistoricInfo:function(){
 			this.showWarning=false;
 			if (this.historicSelected !== null){
-				if(this.showHistoric===false){	
-				this.historicData=[];
-				this.historicTempArray=[];
-				this.historicHumidityArray=[];
-				this.showHistoric=true;
-				this.dataToggleText="Hide Historic Data";
-				
-					firebase.database().ref().child("historic_sessions").child(this.historicSelected).child("data").on("child_added", function(snapshot) {
-				
-						timestamp= snapshot.val().timestamp;
-
-						var newRecord = {
-							"time":timestamp,
-							"temp":snapshot.val().temperature,
-							"humidity":snapshot.val().humidity,
-						};
-						tempMonitor.historicData.push(newRecord);
-						tempMonitor.historicTempArray.push([timestamp,parseFloat(snapshot.val().temperature)]);
-						tempMonitor.historicHumidityArray.push([timestamp,parseFloat(snapshot.val().humidity)]);
-						tempMonitor.historicTempChart.series[0].update({data: tempMonitor.historicTempArray});
-						tempMonitor.historicHumidityChart.series[0].update({data: tempMonitor.historicHumidityArray});
-					});
+				if(this.showHistoric===false){
+					this.showHistoric=true;
+					this.updateHistoricInfo();
+					this.dataToggleText="Hide Historic Data";
 				}
 				else{
-				this.showHistoric=false;
-				this.dataToggleText="Show Historic Data";
-				}	
+					this.showHistoric=false;
+					this.dataToggleText="Show Historic Data";
+				}
 			}
 			else{
 				this.showWarning=true;
 				this.inputWarning= "You must select a historic session to display information";
-			}	
+			}
+		},
+		updateHistoricInfo:function(){
+
+			this.historicData=[];
+			this.historicTempArray=[];
+			this.historicHumidityArray=[];
+			
+			firebase.database().ref().child("historic_sessions").child(this.historicSelected).child("data").on("child_added", function(snapshot) {
+		
+				timestamp= snapshot.val().timestamp;
+
+				var newRecord = {
+					"time":timestamp,
+					"temp":snapshot.val().temperature,
+					"humidity":snapshot.val().humidity,
+				};
+				tempMonitor.historicData.push(newRecord);
+				tempMonitor.historicTempArray.push([timestamp,parseFloat(snapshot.val().temperature)]);
+				tempMonitor.historicHumidityArray.push([timestamp,parseFloat(snapshot.val().humidity)]);
+				tempMonitor.historicTempChart.series[0].update({data: tempMonitor.historicTempArray});
+				tempMonitor.historicHumidityChart.series[0].update({data: tempMonitor.historicHumidityArray});
+			});
 		},
 		displaySessionInfo:function(){
 			if(this.showSession===false){
@@ -147,7 +162,6 @@ var tempMonitor = new Vue({
 			}		
 		},
 		initTempChart:function(){
-
     		tempMonitor.tempChart = new Highcharts.chart('sessionTempChart', {
 			        chart: {
 			            type: 'line'
@@ -186,7 +200,6 @@ var tempMonitor = new Vue({
 			    });
 		},
 		initHistoricTempChart:function(){
-
 			tempMonitor.historicTempChart = new Highcharts.chart('historicTempChart', {
 				chart: {
 					type: 'line'
@@ -254,7 +267,7 @@ var tempMonitor = new Vue({
 			firebase.database().ref('.info/connected').on('value', function(snapshot) {
 				if (snapshot.val() === true) {
 					// We're connected (or reconnected)! Do anything here that should happen only if online (or on reconnect)
-					console.log("connected");
+					console.log("connected to firebase");
 					var connection = firebase.database().ref('status/connections/webclient').push();
 
 					// When I disconnect, remove this device
@@ -265,6 +278,7 @@ var tempMonitor = new Vue({
 					connection.set(true);
 				}
 			});
+			//update list of historic records available
 			firebase.database().ref().child("historic_sessions").on("child_added", function(snapshot) {
 				var key = snapshot.getKey();
 				var newName = {
@@ -274,7 +288,13 @@ var tempMonitor = new Vue({
 				};
 				tempMonitor.historicDataArray.push(newName);
 			});
-
+			//update list of online sensors
+			firebase.database().ref().child("sensors").on("child_added", function(snapshot){
+				tempMonitor.sensorArray.push(snapshot.getKey());
+				if(tempMonitor.sensorArray !== null){
+					tempMonitor.noSensors=false;
+				}
+			});
 		},
 	},
 });
