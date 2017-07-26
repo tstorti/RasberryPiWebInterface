@@ -1,28 +1,36 @@
-body{
-	background-color: #b0bec5;
+[v-cloak]{
+	display:none;
 }
+
+.btn-space{
+	margin-top:10px;
+	margin-right:10px;
+}
+
 .btn-width{
 	width:250px;
 }
 
-[v-cloak]{
-	display:none;
+.dropdownChoice{
+	padding-left:10px;
 }
-.chart{
-	
-}
-.btn-space{
-	margin-top:10px;
-}
-.isOnlineColor{
+
+.isRecordingColor{
 	color: #007E33;
 }
+
 .pageHeader{
 	margin-bottom: 25px;
 }
+
+.panel-margin{
+	margin:10px;
+}
+
 .sensorSelection{
 	margin-top:20px;
 }
-.chartSection{
-	margin-top:20px;
+
+.sessionNameInput{
+	width:80%;
 }

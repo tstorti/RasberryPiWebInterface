@@ -6,151 +6,178 @@
     <title>Tempeature Monitor</title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    
+    <!-- Add Bootstrap theme from Bootswatch-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/paper/bootstrap.min.css">
     <link href="css/style.css" rel="stylesheet">
 </head>
+
 <body>
     <div id="tempMonitor" v-cloak>
         <div class="container pageHeader">
             <div class="h2">Rasberry Pi Monitor</div>
         </div>
+        <!-- Default Section, inputs and current sensor values-->
         <div class="container">
             <div class="row">
-                <div class="col-md-6">
-                    <div>
-                        <div>Data Collection Session Name</div>
-                        <div>
-                            <input id="session-name" v-model="sessionName" placeholder="Session Name">
-                        </div>
-                    </div>
-                    <div class="sensorSelection">
-                        <div>Data to Collect</div>
-                        <div>
+                <!--Input Section -->
+                <div class="col-md-6 container">
+                    <div class="panel">
+                        <div class="panel-body"> 
                             <div>
-                                <input id="showTemp" type="checkbox" v-model="showTemp">
-                                <label for="showTemp">Temperature</label>
+                                <div>Data Collection Session Name</div>
+                                <div>
+                                    <input class="sessionNameInput" id="session-name" v-model="sessionName" placeholder=" Session Name">
+                                </div>
+                            </div>
+                            <div class="sensorSelection">
+                                <div>Show Current Sensor Data:</div>
+                                <div>
+                                    <div>
+                                        <input id="showTemp" type="checkbox" v-model="showTemp">
+                                        <label for="showTemp">Temperature</label>
+                                    </div>
+                                    <div>
+                                        <input id="showHumidity" type="checkbox" v-model="showHumidity">
+                                        <label for="showHumidity">Humidity</label>
+                                    </div>  
+                                </div>
                             </div>
                             <div>
-                                <input id="showHumidity" type="checkbox" v-model="showHumidity">
-                                <label for="showHumidity">Humidity</label>
-                            </div>  
+                                <button class="btn btn-space btn-success btn-width" type="button" v-on:click="startRecording" v-text="statusBtnText" v-bind:class="{'btn-danger':isRecording,}"></button>
+                                <span class="btn-group btn-space dropup">
+                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Select Sensor ID <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <table>
+                                            <tr v-for="sensor in sensorArray">
+                                                <td class="dropdownChoice"><input type="radio" name="historic" :value="sensor" v-model="sensorSelected">{{ sensor }}</input></td>
+                                            </tr>
+                                            <tr v-show="noSensors">
+                                                <td class="dropdownChoice"> No Sensors Online</td>
+                                            </tr>
+                                        </table> 
+                                    </ul>
+                                </span>
+                            </div>
+                            <div>
+                                <button class="btn btn-space btn-primary btn-width" type="button" v-on:click="displayHistoricInfo" v-text="dataToggleText"></button>
+                                <span class="btn-group btn-space">
+                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Select Historic Session <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <table>
+                                            <tr v-for="record in historicDataArray">
+                                                <td class="dropdownChoice"><input type="radio" name="historic" :value="record.key" v-model="historicSelected" v-on:click="updateHistoricInfo">{{record.name}}</input></td>
+                                            </tr>
+                                        </table> 
+                                    </ul>
+                                </span>
+                            </div>
+                            <div>
+                                <button class="btn btn-space btn-primary btn-width" type="button" v-on:click="displaySessionInfo" v-text="sessionToggleText"></button>
+                            </div>
                         </div>
                     </div>
-                    <div>
-                        <button class="btn btn-space btn-success btn-width" type="button" v-on:click="startRecording" v-text="statusBtnText" v-bind:class="{'btn-danger':isOnline,}"></button>
-                        <span class="btn-group">
-                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Select Sensor ID <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <table>
-                                    <!--Placeholder for now, should allow for user to select which sensor they want based on which are connected to firebase-->
-                                    <tr v-for="sensor in sensorArray">
-                                        <td><input type="radio" name="historic" :value="sensor" v-model="sensorSelected" v-on:click="">{{ sensor }}</input></td>
-                                    </tr>
-                                    <tr v-show="noSensors">
-                                        <td>No Sensors Online</td>
-                                    </tr>
-                                </table> 
-                            </ul>
-                        </span>
-                    </div>
-                    <div>
-                        <button class="btn btn-space btn-info btn-width" type="button" v-on:click="displayHistoricInfo" v-text="dataToggleText"></button>
-                        <span class="btn-group">
-                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Select Historic Session <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <table>
-                                    <tr v-for="record in historicDataArray">
-                                        <td><input type="radio" name="historic" :value="record.key" v-model="historicSelected" v-on:click="updateHistoricInfo">{{record.name}}</input></td>
-                                    </tr>
-                                </table> 
-                            </ul>
-                        </span>
-                    </div>
-                    <div>
-                        <button class="btn btn-space btn-info btn-width" type="button" v-on:click="displaySessionInfo" v-text="sessionToggleText"></button>
-                    </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="h3" v-bind:class="{'isOnlineColor': isOnline,}">Session: {{ sessionName }}</div>
-                    <table class="table">
-                        <tr v-show="showTemp">
-                            <th>{{ tempHeader }}</th>
-                            <td>{{ tempValue }}</td>
-                        </tr>
-                        <tr v-show="showHumidity">
-                            <th>{{ humidityHeader }}</th>
-                            <td>{{ humidityValue }}</td>
-                        </tr>
-                    </table>  
+                <!--Current Session Sensor Values -->
+                <div class="col-md-6 container">
+                    <div class="panel panel-margin">
+                        <div class="panel-body">
+                            <div class="h3" v-bind:class="{'isRecordingColor': isRecording,}">Session: {{ sessionName }}</div>
+                            <table class="table">
+                                <tr v-show="showTemp">
+                                    <th>Temperature: </th>
+                                    <td>{{ tempValue }}</td>
+                                </tr>
+                                <tr v-show="showHumidity">
+                                    <th>Humidity: </th>
+                                    <td>{{ humidityValue }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
+            <!--Warning message for invalid inputs -->
             <div v-show="showWarning">{{inputWarning}}</div>
         </div>
-         
-        <div class="container">
-            <div class="row" >
-                <div class="col-md-6">
-                    <div v-show="showSession" id="sessionTempChart"></div>
-                </div>
-                <div class="col-md-6">
-                    <div class="col-md" v-show="showSession" id="sessionHumidityChart"></div>
-                </div>
-            </div>
-        </div>
-        <div class="container chartSection" v-if="showSession">
-            <div>
-                <div>{{ sessionName }} Session Data</div>
-                <div>
-                    <table class="table">
-                        <tr>
-                            <th>Time</th>
-                            <th>Temperature</th>
-                            <th>Humidity</th>
-                        </tr> 
-                        <tr v-for="record in sessionData">
-                            <td>{{record.time}}</td>
-                            <td>{{record.temp}}</td>
-                            <td>{{record.humidity}}</td> 
-                        </tr>
-                    </table>
+        <!--Session Charts -->
+        <div class="container" v-show="showSession">
+            <div class="panel panel-margin">
+                <div class="panel-body">
+                    <div class="row" >
+                        <div class="col-md-6">
+                            <div v-show="showSession" id="sessionTempChart"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="col-md" v-show="showSession" id="sessionHumidityChart"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="container">
-            <div class="row" >
-                <div class="col-md-6">
-                    <div v-show="showHistoric" id="historicTempChart"></div>
-                </div>
-                <div class="col-md-6">
-                    <div class="col-md" v-show="showHistoric" id="historicHumidityChart"></div>
+        <!--Session Raw Data Table -->
+        <div class="container" v-if="showSession">
+            <div class="panel panel-margin">
+                <div class="panel-body">
+                    <div>{{ sessionName }} Session Data</div>
+                    <div>
+                        <table class="table">
+                            <tr>
+                                <th>Time</th>
+                                <th>Temperature</th>
+                                <th>Humidity</th>
+                            </tr> 
+                            <tr v-for="record in sessionData">
+                                <td>{{record.time}}</td>
+                                <td>{{record.temp}}</td>
+                                <td>{{record.humidity}}</td> 
+                            </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="container chartSection" v-if="showHistoric">
-            <div>
-                <div>Historic Data</div>
-                <div>
-                    <table class="table">
-                        <tr>
-                            <th>Time</th>
-                            <th>Temperature</th>
-                            <th>Humidity</th>
-                        </tr>
-                        <tr v-for="record in historicData">
-                            <td>{{record.time}}</td>
-                            <td>{{record.temp}}</td>
-                            <td>{{record.humidity}}</td>
-                        </tr>   
-                    </table>
+        <!--Historic Charts -->
+        <div class="container" v-show="showHistoric">
+            <div class="panel panel-margin">
+                <div class="panel-body">
+                    <div class="row" >
+                        <div class="col-md-6">
+                            <div v-show="showHistoric" id="historicTempChart"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="col-md" v-show="showHistoric" id="historicHumidityChart"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--Historic Raw Data Table -->
+        <div class="container" v-if="showHistoric">
+            <div class="panel panel-margin">
+                <div class="panel-body">
+                    <div>Historic Data</div>
+                    <div>
+                        <table class="table">
+                            <tr>
+                                <th>Time</th>
+                                <th>Temperature</th>
+                                <th>Humidity</th>
+                            </tr>
+                            <tr v-for="record in historicData">
+                                <td>{{record.time}}</td>
+                                <td>{{record.temp}}</td>
+                                <td>{{record.humidity}}</td>
+                            </tr>   
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    
     <!--Firebase-->
     <script src="https://www.gstatic.com/firebasejs/4.1.3/firebase.js"></script>  
 	<!--Vue CDN-->
