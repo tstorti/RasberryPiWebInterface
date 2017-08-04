@@ -35,10 +35,12 @@
                                     <div>
                                         <input id="showTemp" type="checkbox" v-model="showTemp">
                                         <label for="showTemp">Temperature</label>
+                                        <input class="targetInput" id="targetTemp" type="text" placeholder=" Target Temperature" v-show="showTemp" v-model="targetTemp">
                                     </div>
                                     <div>
                                         <input id="showHumidity" type="checkbox" v-model="showHumidity">
                                         <label for="showHumidity">Humidity</label>
+                                         <input class="targetInput" id="targetHumidity" type="text" placeholder=" Target Humidity" v-show="showHumidity" v-model="targetHumidity">
                                     </div>  
                                 </div>
                             </div>
@@ -188,7 +190,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
     <!-- High Charts -->
-    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
 
     <!--Moment.js to get timestamp for data-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.js"></script>

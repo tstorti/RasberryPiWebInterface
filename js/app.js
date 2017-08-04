@@ -22,6 +22,10 @@ var tempMonitor = new Vue({
 		//updates to current sensor data panel
 		tempValue: null,
 		humidityValue: null,
+
+		//target values for temp, humidity
+		targetTemp:null,
+		targetHumidity:null,
 		
 		//updates historic and session data tables
 		historicData:[],
@@ -196,26 +200,27 @@ var tempMonitor = new Vue({
 		},
 		//this function limits the labels shown on charts if more than 12 data points
 		limitLabels:function(array){
-			var newLabelArray=[];
-			if(array.length>12){
-				var firstLabel = array[0];
-				var lastLabel = array[array.length -1];
-				var label25 = array[Math.floor(array.length/4)];
-				var label50 = array[Math.floor((array.length/4)*2)];
-				var label75 = array[Math.floor((array.length/4)*3)];
-				for (var i=0;i<array.length;i++){
-					newLabelArray[i]="";
-				}
-				newLabelArray[0]=firstLabel;
-				newLabelArray[Math.floor(array.length/4)]=label25;
-				newLabelArray[Math.floor(array.length/4)*2]=label50;
-				newLabelArray[Math.floor(array.length/4)*3]=label75;
-				newLabelArray[array.length -1]=lastLabel;
-				return (newLabelArray);
-			}
-			else{
-				return (array);
-			}		
+			// var newLabelArray=[];
+			// if(array.length>12){
+			// 	var firstLabel = array[0];
+			// 	var lastLabel = array[array.length -1];
+			// 	var label25 = array[Math.floor(array.length/4)];
+			// 	var label50 = array[Math.floor((array.length/4)*2)];
+			// 	var label75 = array[Math.floor((array.length/4)*3)];
+			// 	for (var i=0;i<array.length;i++){
+			// 		newLabelArray[i]="";
+			// 	}
+			// 	newLabelArray[0]=firstLabel;
+			// 	newLabelArray[Math.floor(array.length/4)]=label25;
+			// 	newLabelArray[Math.floor(array.length/4)*2]=label50;
+			// 	newLabelArray[Math.floor(array.length/4)*3]=label75;
+			// 	newLabelArray[array.length -1]=lastLabel;
+			// 	return (newLabelArray);
+			// }
+			// else{
+			// 	return (array);
+			// }
+			return(array);		
 		}, 
 		//init the session temp chart object
 		initTempChart:function(){
@@ -339,6 +344,16 @@ var tempMonitor = new Vue({
 			this.initHumidityChart();
 			this.initHistoricTempChart();
 			this.initHistoricHumidityChart();
+		},
+		setTargetTemp:function(){
+			//TODO:
+			//Set target temperature for each session
+			//if current temp > target temp (+2 deg? - what is appropriate +/-?) update firebase on/off value for relay
+			//if current temp < target temp (-2 deg?), update firebase on/off value to turn off relay
+			
+			//add a new series to temp chart with target
+			//could add another chart with visualization (show +/- variance)
+			
 		},
 	},
 });
